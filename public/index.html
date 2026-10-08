@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Phantom Front</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+<body>
+  <div id="hud" class="hidden">
+    <div id="scorebar">
+      <div class="team phantoms"><span class="tname">PHANTOMS</span><span id="score-p">0</span></div>
+      <div id="timer">10:00</div>
+      <div class="team ghosts"><span id="score-g">0</span><span class="tname">GHOSTS</span></div>
+    </div>
+    <div id="crosshair"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="dot"></i></div>
+    <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+    <div id="scope"></div>
+    <div id="vignette"></div>
+    <div id="indicators"></div>
+    <div id="killfeed"></div>
+    <div id="notify"></div>
+    <div id="deathmsg" class="hidden"></div>
+    <div id="health">
+      <div class="label">HEALTH</div>
+      <div class="bar"><div id="health-fill"></div></div>
+      <div id="health-num">100</div>
+    </div>
+    <div id="weapon">
+      <div id="wname">AK-12</div>
+      <div><span id="mag">30</span><span id="reserve">/ 120</span></div>
+      <div id="wmode">AUTO</div>
+      <div id="nades">FRAG x2</div>
+    </div>
+    <div id="scoreboard" class="hidden"></div>
+  </div>
+
+  <div id="menu">
+    <div class="menu-inner">
+      <h1>PHANTOM<span>FRONT</span></h1>
+      <div class="sub">TEAM DEATHMATCH · CRANE YARD · FIRST TO 50</div>
+      <div id="classes"></div>
+      <button id="deploy">DEPLOY</button>
+      <div class="controls">
+        <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> crouch / slide while sprinting ·
+        <b>Q/E</b> lean · <b>LMB</b> fire · <b>RMB</b> aim · <b>R</b> reload · <b>1/2/3</b> or wheel switch ·
+        <b>V</b> fire mode · <b>G</b> frag · <b>Tab</b> scoreboard · <b>Esc</b> pause
+      </div>
+    </div>
+  </div>
+
+  <div id="end" class="hidden"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

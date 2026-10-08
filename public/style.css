@@ -1,0 +1,128 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden; background: #0b0d10;
+  font-family: 'Rajdhani', 'Segoe UI', sans-serif; color: #fff; user-select: none;
+}
+canvas { display: block; }
+.hidden { display: none !important; }
+
+#hud { position: fixed; inset: 0; pointer-events: none; }
+
+/* Score bar */
+#scorebar { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: stretch; gap: 4px; font-weight: 700; }
+#scorebar .team { display: flex; align-items: center; gap: 10px; padding: 4px 14px; font-size: 26px; min-width: 150px; }
+#scorebar .phantoms { background: linear-gradient(90deg, rgba(40,90,190,.15), rgba(40,90,190,.85)); justify-content: flex-end; }
+#scorebar .ghosts { background: linear-gradient(90deg, rgba(220,130,40,.85), rgba(220,130,40,.15)); }
+#scorebar .tname { font-size: 14px; letter-spacing: 2px; opacity: .85; }
+#timer { background: rgba(0,0,0,.6); padding: 4px 14px; font-size: 22px; display: flex; align-items: center; }
+
+/* Crosshair */
+#crosshair { position: absolute; left: 50%; top: 50%; --gap: 10px; transition: opacity .08s; }
+#crosshair i { position: absolute; background: #fff; box-shadow: 0 0 2px #000; }
+#crosshair .t, #crosshair .b { width: 2px; height: 9px; left: -1px; }
+#crosshair .l, #crosshair .r { width: 9px; height: 2px; top: -1px; }
+#crosshair .t { top: calc(-1 * var(--gap) - 9px); }
+#crosshair .b { top: var(--gap); }
+#crosshair .l { left: calc(-1 * var(--gap) - 9px); }
+#crosshair .r { left: var(--gap); }
+#crosshair .dot { width: 2px; height: 2px; left: -1px; top: -1px; }
+#crosshair.off { opacity: 0; }
+
+#hitmarker { position: absolute; left: 50%; top: 50%; opacity: 0; }
+#hitmarker i { position: absolute; width: 2px; height: 9px; background: #fff; left: -1px; top: -4.5px; }
+#hitmarker i:nth-child(1) { transform: rotate(45deg) translateY(-11px); }
+#hitmarker i:nth-child(2) { transform: rotate(135deg) translateY(-11px); }
+#hitmarker i:nth-child(3) { transform: rotate(225deg) translateY(-11px); }
+#hitmarker i:nth-child(4) { transform: rotate(315deg) translateY(-11px); }
+#hitmarker.show { animation: hm .25s ease-out; }
+#hitmarker.head i { background: #ff4040; }
+#hitmarker.kill i { background: #ff2020; height: 13px; }
+@keyframes hm { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+#scope {
+  position: absolute; inset: 0; display: none;
+  background:
+    linear-gradient(#000, #000) center / 1px 100% no-repeat,
+    linear-gradient(#000, #000) center / 100% 1px no-repeat,
+    radial-gradient(circle at center, transparent 0, transparent 38vh, #000 38.3vh);
+}
+#scope.on { display: block; }
+
+#vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 45%, rgba(170,0,0,.75) 100%); opacity: 0; }
+
+#indicators { position: absolute; left: 50%; top: 50%; }
+.ind { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.ind::after {
+  content: ''; position: absolute; left: -28px; top: -150px; width: 56px; height: 18px;
+  background: radial-gradient(ellipse at center bottom, rgba(255,40,40,.9), transparent 70%);
+  animation: fade 1.2s forwards;
+}
+@keyframes fade { from { opacity: 1; } to { opacity: 0; } }
+
+/* Killfeed & notifications */
+#killfeed { position: absolute; top: 60px; right: 18px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.kf { background: rgba(0,0,0,.55); padding: 3px 10px; font-size: 17px; font-weight: 600; animation: fadeout 7s forwards; }
+.kf .w { color: #ccc; margin: 0 8px; font-size: 14px; }
+.kf .hs { color: #ff5a5a; font-size: 12px; margin-left: 6px; }
+.c-phantoms { color: #6ea3ff; }
+.c-ghosts { color: #ffa54d; }
+@keyframes fadeout { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
+
+#notify { position: absolute; top: 62%; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.nt { font-size: 20px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 6px rgba(0,0,0,.8); animation: pop 2.2s forwards; }
+.nt b { color: #ffd84d; margin-right: 8px; }
+@keyframes pop { 0% { transform: scale(1.4); opacity: 0; } 10% { transform: scale(1); opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+
+#deathmsg { position: absolute; top: 30%; width: 100%; text-align: center; font-size: 34px; font-weight: 700; text-shadow: 0 0 10px #000; }
+#deathmsg small { display: block; font-size: 18px; opacity: .8; }
+
+/* Health & weapon */
+#health { position: absolute; left: 24px; bottom: 24px; width: 260px; }
+#health .label { font-size: 13px; letter-spacing: 2px; opacity: .8; }
+#health .bar { height: 10px; background: rgba(0,0,0,.5); margin-top: 4px; }
+#health-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #8fe39b, #e8fbe9); transition: width .1s; }
+#health-num { font-size: 30px; font-weight: 700; margin-top: 2px; }
+
+#weapon { position: absolute; right: 26px; bottom: 22px; text-align: right; text-shadow: 0 0 6px rgba(0,0,0,.7); }
+#wname { font-size: 20px; letter-spacing: 2px; opacity: .9; }
+#mag { font-size: 52px; font-weight: 700; line-height: 1; }
+#mag.low { color: #ff5a5a; }
+#reserve { font-size: 24px; opacity: .75; margin-left: 6px; }
+#wmode, #nades { font-size: 14px; letter-spacing: 2px; opacity: .75; }
+
+/* Scoreboard */
+#scoreboard { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; gap: 18px; }
+#scoreboard .col { background: rgba(10,12,16,.85); min-width: 340px; padding: 10px 14px; }
+#scoreboard h3 { font-size: 20px; letter-spacing: 3px; margin-bottom: 6px; }
+#scoreboard table { width: 100%; border-collapse: collapse; font-size: 17px; }
+#scoreboard td, #scoreboard th { padding: 3px 6px; text-align: right; }
+#scoreboard td:first-child, #scoreboard th:first-child { text-align: left; }
+#scoreboard th { font-size: 12px; opacity: .6; letter-spacing: 1px; }
+#scoreboard tr.me { background: rgba(255,255,255,.12); }
+#scoreboard tr.dead { opacity: .5; }
+
+/* Menu */
+#menu, #end {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(10,14,22,.55), rgba(5,6,9,.92));
+}
+.menu-inner { text-align: center; max-width: 980px; padding: 20px; }
+h1 { font-size: 72px; letter-spacing: 8px; line-height: 1; }
+h1 span { color: #6ea3ff; margin-left: 14px; }
+.sub { letter-spacing: 4px; opacity: .7; margin: 8px 0 28px; }
+#classes { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.cls { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); padding: 12px; width: 210px; text-align: left; }
+.cls h2 { font-size: 22px; letter-spacing: 3px; margin-bottom: 8px; }
+.gun { display: block; width: 100%; margin-top: 6px; padding: 8px 10px; background: rgba(0,0,0,.35); border: 1px solid transparent; color: #fff; font: inherit; font-size: 17px; font-weight: 600; text-align: left; cursor: pointer; }
+.gun small { display: block; font-size: 12px; opacity: .6; font-weight: 500; }
+.gun:hover { border-color: rgba(110,163,255,.5); }
+.gun.sel { border-color: #6ea3ff; background: rgba(110,163,255,.2); }
+#deploy, #end button {
+  margin-top: 26px; padding: 12px 70px; font: inherit; font-size: 26px; font-weight: 700; letter-spacing: 6px;
+  background: #6ea3ff; color: #0b0d10; border: none; cursor: pointer;
+}
+#deploy:hover, #end button:hover { background: #8fb8ff; }
+.controls { margin-top: 24px; font-size: 15px; opacity: .7; line-height: 1.7; }
+.controls b { color: #9fc0ff; }
+#end .menu-inner h1 { font-size: 64px; }
+#end .stats { font-size: 22px; margin-top: 12px; opacity: .85; }
