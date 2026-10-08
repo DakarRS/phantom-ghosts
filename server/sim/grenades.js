@@ -1,11 +1,9 @@
 import * as THREE from 'three';
-import { G } from './ctx.js';
-import { overlap, lineOfSight } from './physics.js';
-import { FRAG } from './guns.js';
+import { G, r2 } from './ctx.js';
+import { overlap, lineOfSight } from '../../public/src/shared/physics.js';
+import { FRAG } from '../../public/src/shared/guns.js';
 
 const RADIUS = 9, MAX_DMG = 170, FUSE = 3, SIZE = 0.07;
-const geo = new THREE.SphereGeometry(SIZE, 8, 6);
-const mat = new THREE.MeshLambertMaterial({ color: 0x3b4a2c });
 const feet = new THREE.Vector3(), chest = new THREE.Vector3();
 
 function blocked(p) {
@@ -15,20 +13,13 @@ function blocked(p) {
 }
 
 export class Grenades {
-  constructor(scene) {
-    this.scene = scene;
+  constructor() {
     this.list = [];
+    this.nextId = 1;
   }
 
-  throw(owner) {
-    const dir = G.camera.getWorldDirection(new THREE.Vector3());
-    const pos = G.camera.getWorldPosition(new THREE.Vector3()).addScaledVector(dir, 0.4);
-    const vel = dir.multiplyScalar(18).add(new THREE.Vector3(0, 3, 0)).addScaledVector(owner.vel, 0.5);
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.castShadow = true;
-    this.scene.add(mesh);
-    this.list.push({ mesh, pos, vel, fuse: FUSE, owner });
-    G.audio.pin();
+  throw(owner, pos, vel) {
+    this.list.push({ id: this.nextId++, pos, vel, fuse: FUSE, owner });
   }
 
   update(dt) {
@@ -37,7 +28,6 @@ export class Grenades {
       g.fuse -= dt;
       if (g.fuse <= 0) {
         this.explode(g);
-        this.scene.remove(g.mesh);
         this.list.splice(i, 1);
         continue;
       }
@@ -50,16 +40,11 @@ export class Grenades {
         g.vel[a] *= -0.35;
         if (a === 'y') { g.vel.x *= 0.8; g.vel.z *= 0.8; }
       }
-      g.mesh.position.copy(g.pos);
-      g.mesh.rotation.x += dt * 10;
     }
   }
 
   explode(g) {
-    G.effects.explosion(g.pos);
-    const camDist = g.pos.distanceTo(G.camera.position);
-    G.audio.explosion(camDist);
-    G.shake = Math.max(G.shake ?? 0, 1 - camDist / 25);
+    G.emit('ex', r2(g.pos.x), r2(g.pos.y), r2(g.pos.z));
     const from = g.pos.clone().setY(g.pos.y + 0.3);
     for (const e of G.entities) {
       if (!e.alive || (e.team === g.owner.team && e !== g.owner)) continue;
@@ -69,4 +54,6 @@ export class Grenades {
       G.match.damage(e, MAX_DMG * Math.pow(1 - d / RADIUS, 1.3), g.owner, FRAG, false);
     }
   }
+
+  snapshot() { return this.list.map((g) => [g.id, r2(g.pos.x), r2(g.pos.y), r2(g.pos.z)]); }
 }

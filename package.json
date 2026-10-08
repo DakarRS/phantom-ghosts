@@ -1,0 +1,14 @@
+{
+  "name": "phantom-ghosts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test server/test/"
+  },
+  "engines": { "node": ">=22" },
+  "dependencies": {
+    "three": "0.160.0",
+    "ws": "8.22.0"
+  }
+}

@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { G } from './ctx.js';
-import { lineOfSight, moveBody } from './physics.js';
+import { lineOfSight, moveBody } from '../../public/src/shared/physics.js';
 import { fireBullet } from './combat.js';
-import { BOUND } from './world.js';
+import { BOUND } from '../../public/src/shared/map.js';
 
 const VIEW_DIST = 85, FOV_COS = Math.cos(1.25), TURN = 5, SPEED = 4.4;
 const eye = new THREE.Vector3(), tgt = new THREE.Vector3(), dir = new THREE.Vector3(), muzzle = new THREE.Vector3();
@@ -141,5 +141,4 @@ function tryFire(bot, t, dist) {
     fireBullet(bot, eye, dir, d, muzzle);
   }
   bot.muzzleFlash();
-  G.audio.shot(d, bot.pos.distanceTo(G.camera.position));
 }

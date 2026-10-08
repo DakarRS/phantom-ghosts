@@ -1,58 +1,52 @@
-import { G } from './ctx.js';
+import { G, r2 } from './ctx.js';
 
 const KILL_LIMIT = 50;
 const MATCH_TIME = 600;
 
 export class Match {
   constructor() {
+    this.onEnd = null;
+    this.reset();
+  }
+
+  reset() {
     this.score = { phantoms: 0, ghosts: 0 };
     this.limit = KILL_LIMIT;
     this.time = MATCH_TIME;
     this.over = false;
-    this.onEnd = null;
   }
 
   damage(target, amount, attacker, def, head) {
     if (!target.alive || this.over) return;
     target.health -= amount;
     target.lastHit = G.time;
-    target.damagers ??= new Set();
     target.damagers.add(attacker);
     target.onDamaged?.(attacker);
-    if (attacker.isPlayer && target !== attacker) {
-      G.hud.hitmarker(head, target.health <= 0);
-      G.audio.hit(head);
-    }
-    if (target.isPlayer) {
-      G.hud.damageFrom(attacker.pos);
-      G.audio.hurt();
-    }
-    if (target.health <= 0) this.kill(target, attacker, def, head);
+    const kill = target.health <= 0;
+    if (attacker !== target) G.direct(attacker, 'hm', head ? 1 : 0, kill ? 1 : 0);
+    G.direct(target, 'dmg', r2(attacker.pos.x), r2(attacker.pos.z));
+    if (kill) this.kill(target, attacker, def, head);
   }
 
   kill(victim, killer, def, head) {
     victim.health = 0;
     victim.die(killer);
     victim.deaths++;
-    const suicide = killer === victim;
-    if (!suicide) {
+    if (killer !== victim) {
+      const pts = head ? 125 : 100;
       killer.kills++;
-      killer.score += head ? 125 : 100;
+      killer.score += pts;
       this.score[killer.team]++;
+      G.direct(killer, 'nt', head ? 'HEADSHOT KILL' : 'ENEMY KILLED', pts);
     }
-    G.hud.killfeed(killer, victim, def.name, head);
-
-    if (killer.isPlayer && !suicide) {
-      G.hud.notify(head ? 'HEADSHOT KILL' : 'ENEMY KILLED', head ? 125 : 100);
-      G.audio.kill();
+    G.emit('kf', killer.id, victim.id, def.name, head ? 1 : 0);
+    for (const d of victim.damagers) {
+      if (d === killer || d.team === victim.team) continue;
+      d.score += 25;
+      G.direct(d, 'nt', 'ASSIST', 25);
     }
-    const p = G.player;
-    if (!killer.isPlayer && victim.team !== p.team && victim.damagers?.has(p)) {
-      p.score += 25;
-      G.hud.notify('ASSIST', 25);
-    }
-    victim.damagers?.clear();
-    if (victim.isPlayer) G.onPlayerDeath?.(killer);
+    victim.damagers.clear();
+    G.direct(victim, 'died', killer.id);
     if (this.score[killer.team] >= this.limit) this.end();
   }
 
@@ -69,7 +63,7 @@ export class Match {
     this.onEnd?.(phantoms === ghosts ? null : phantoms > ghosts ? 'phantoms' : 'ghosts');
   }
 
-  // Prefer spawn points far from living enemies, with a little randomness so spawns don't become predictable.
+  // Prefer spawn points far from living enemies, with some randomness so spawns don't become predictable.
   respawn(e) {
     const points = G.world.spawns[e.team];
     let best = points[0], bestScore = -Infinity;

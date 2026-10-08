@@ -4,7 +4,10 @@ export const colliders = [];
 const EPS = 0.001;
 const probe = { min: new THREE.Vector3(), max: new THREE.Vector3() };
 
-export function addCollider(box) { colliders.push(box); }
+export function setColliders(list) {
+  colliders.length = 0;
+  colliders.push(...list);
+}
 
 // Strict overlap so a body resting exactly on a surface doesn't count as intersecting it.
 function intersects(a, b) {

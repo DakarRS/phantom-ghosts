@@ -1,6 +1,11 @@
 version: 2
 updates:
   - package-ecosystem: docker
+    directories: [/, /server]
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly

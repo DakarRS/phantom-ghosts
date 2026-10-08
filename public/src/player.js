@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { moveBody, overlap, raycastWorld } from './physics.js';
+import { moveBody, overlap, raycastWorld } from './shared/physics.js';
 import { G } from './ctx.js';
 
 const RADIUS = 0.35, STAND = 1.8, CROUCH = 1.15;
@@ -128,7 +128,6 @@ export class Player {
       this.stepDist += this.moving * dt;
       if (this.stepDist > (this.sprinting ? 2.6 : 2.1)) { this.stepDist = 0; G.audio.step(this.sprinting); }
     }
-    if (G.time - this.lastHit > 5 && this.health < 100) this.health = Math.min(100, this.health + 25 * dt);
 
     this.updateCamera();
   }

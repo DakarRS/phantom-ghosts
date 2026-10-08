@@ -44,8 +44,17 @@
     <div class="menu-inner">
       <h1>PHANTOM<span>FRONT</span></h1>
       <div class="sub">TEAM DEATHMATCH · CRANE YARD · FIRST TO 50</div>
-      <div id="classes"></div>
-      <button id="deploy">DEPLOY</button>
+      <div id="browser">
+        <input id="callsign" maxlength="16" placeholder="CALLSIGN" autocomplete="off" spellcheck="false">
+        <div id="servers"><div class="srv-empty">Finding servers…</div></div>
+      </div>
+      <div id="loadout" class="hidden">
+        <div id="room-name"></div>
+        <div id="classes"></div>
+        <button id="deploy">DEPLOY</button>
+        <button id="leave" class="link">LEAVE SERVER</button>
+      </div>
+      <div id="menu-error"></div>
       <div class="controls">
         <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> crouch / slide while sprinting ·
         <b>Q/E</b> lean · <b>LMB</b> fire · <b>RMB</b> aim · <b>R</b> reload · <b>1/2/3</b> or wheel switch ·

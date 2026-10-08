@@ -1,11 +1,12 @@
 import * as THREE from 'three';
-import { GUNS } from './guns.js';
+import { GUNS } from './shared/guns.js';
+import { raycastWorld } from './shared/physics.js';
 import { G } from './ctx.js';
-import { fireBullet, castBullet } from './combat.js';
 
 const origin = new THREE.Vector3(), dir = new THREE.Vector3(), quat = new THREE.Quaternion();
 const muzzle = new THREE.Vector3();
 const SWITCH_TIME = 0.35;
+const round = (n) => Math.round(n * 1000) / 1000;
 
 // The local player's loadout: primary, M9 sidearm, knife, plus frags.
 export class Arsenal {
@@ -25,7 +26,7 @@ export class Arsenal {
   }
 
   equip(primary) {
-    this.slots = [primary, 'm9', 'knife'].map((k) => ({ def: GUNS[k], mag: GUNS[k].mag, reserve: GUNS[k].reserve, modeIdx: 0 }));
+    this.slots = [primary, 'm9', 'knife'].map((k) => ({ key: k, def: GUNS[k], mag: GUNS[k].mag, reserve: GUNS[k].reserve, modeIdx: 0 }));
     this.nades = 2;
     this.switchTo(0, true);
   }
@@ -63,7 +64,7 @@ export class Arsenal {
     }
     if (input.hit('KeyG') && this.nades > 0 && this.switchT <= 0 && this.reloadT <= 0) {
       this.nades--;
-      G.grenades.throw(this.player);
+      this.throwNade();
       this.refreshHud();
     }
 
@@ -105,11 +106,16 @@ export class Arsenal {
     cam.getWorldPosition(origin);
     cam.getWorldQuaternion(quat);
     this.vm.muzzleWorld(cam, muzzle);
+    const dirs = [];
     for (let i = 0; i < (d.pellets ?? 1); i++) {
       const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * spread;
       dir.set(Math.cos(a) * r, Math.sin(a) * r, -1).normalize().applyQuaternion(quat);
-      fireBullet(p, origin, dir, d, this.scoped() ? null : muzzle);
+      dirs.push(dir.toArray().map(round));
+      // Tracer is drawn right away; hits and impacts come back from the server.
+      const end = raycastWorld(origin, dir, 400)?.point ?? origin.clone().addScaledVector(dir, 400);
+      G.effects.tracer(this.scoped() ? origin : muzzle, end);
     }
+    G.net.send({ t: 'shoot', gun: s.key, o: origin.toArray().map(round), d: dirs, rt: G.net.renderTime() });
     p.addRecoil(d.recoil[0] * (1 - 0.35 * this.ads) * (0.8 + Math.random() * 0.4), (Math.random() - 0.5) * d.recoil[1] * 2);
     this.vm.kick(d);
     G.audio.shot(d, 0);
@@ -123,16 +129,18 @@ export class Arsenal {
     this.nextFire = G.time + 60 / this.def.rpm;
     this.vm.stab();
     G.audio.swing();
+    G.camera.getWorldPosition(origin);
+    G.camera.getWorldDirection(dir);
+    G.net.send({ t: 'melee', o: origin.toArray().map(round), d: dir.toArray().map(round), rt: G.net.renderTime() });
+  }
+
+  throwNade() {
     const cam = G.camera;
-    cam.getWorldPosition(origin);
     cam.getWorldDirection(dir);
-    const r = castBullet(this.player, origin, dir, this.def.range[1]);
-    if (r.hit) {
-      G.effects.blood(r.hit.point);
-      G.match.damage(r.hit.entity, this.def.damage[0], this.player, this.def, r.hit.part === 'head');
-    } else if (r.world) {
-      G.effects.impact(r.world.point, r.world.normal);
-    }
+    cam.getWorldPosition(origin).addScaledVector(dir, 0.4);
+    const vel = dir.clone().multiplyScalar(18).add(new THREE.Vector3(0, 3, 0)).addScaledVector(this.player.vel, 0.5);
+    G.net.send({ t: 'nade', o: origin.toArray().map(round), v: vel.toArray().map(round) });
+    G.audio.pin();
   }
 
   startReload() {

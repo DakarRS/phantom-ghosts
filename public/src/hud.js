@@ -75,19 +75,19 @@ export class Hud {
     setTimeout(() => el.remove(), 1200);
   }
 
-  deathMsg(killer) {
+  deathMsg(killer, weapon) {
     const el = $('deathmsg');
-    if (!killer) { el.classList.add('hidden'); return; }
-    el.innerHTML = killer.isPlayer
-      ? 'YOU KILLED YOURSELF'
-      : `KILLED BY <span class="c-${killer.team}">${esc(killer.name)}</span><small>${esc(killer.def?.name ?? '')} · ${Math.max(0, Math.round(killer.health))} HP left</small>`;
+    if (killer === undefined) { el.classList.add('hidden'); return; }
+    el.innerHTML = killer
+      ? `KILLED BY <span class="c-${killer.team}">${esc(killer.name)}</span><small>${esc(weapon ?? '')}</small>`
+      : 'YOU KILLED YOURSELF';
     el.classList.remove('hidden');
   }
 
-  update(match) {
-    $('score-p').textContent = match.score.phantoms;
-    $('score-g').textContent = match.score.ghosts;
-    const t = Math.ceil(match.time);
+  update(score, timeLeft) {
+    $('score-p').textContent = score[0];
+    $('score-g').textContent = score[1];
+    const t = Math.max(0, timeLeft);
     $('timer').textContent = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
   }
 
@@ -99,12 +99,12 @@ export class Hud {
 }
 
 export function scoreboardHtml() {
-  const col = (team, label) => {
-    const rows = G.entities.filter((e) => e.team === team).sort((a, b) => b.score - a.score)
-      .map((e) => `<tr class="${e.isPlayer ? 'me' : ''} ${e.alive ? '' : 'dead'}"><td>${esc(e.name)}</td><td>${e.kills}</td><td>${e.deaths}</td><td>${e.score}</td></tr>`)
+  const col = (team, label, score) => {
+    const rows = [...G.roster.values()].filter((e) => e.team === team).sort((a, b) => b.score - a.score)
+      .map((e) => `<tr class="${e.id === G.myId ? 'me' : ''}"><td>${esc(e.name)}${e.bot ? ' <small>BOT</small>' : ''}</td><td>${e.kills}</td><td>${e.deaths}</td><td>${e.score}</td></tr>`)
       .join('');
-    return `<div class="col"><h3 class="c-${team}">${label} · ${G.match.score[team]}</h3>` +
+    return `<div class="col"><h3 class="c-${team}">${label} · ${score}</h3>` +
       `<table><tr><th>PLAYER</th><th>K</th><th>D</th><th>SCORE</th></tr>${rows}</table></div>`;
   };
-  return col('phantoms', 'PHANTOMS') + col('ghosts', 'GHOSTS');
+  return col('phantoms', 'PHANTOMS', G.score[0]) + col('ghosts', 'GHOSTS', G.score[1]);
 }

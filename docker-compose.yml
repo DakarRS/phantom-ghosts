@@ -4,6 +4,17 @@ services:
     image: ghcr.io/dakarrs/phantom-ghosts:latest
     ports:
       - "${PORT:-8765}:8080"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: ghcr.io/dakarrs/phantom-ghosts-server:latest
+    environment:
+      ROOMS: ${ROOMS:-Alpha,Bravo,Charlie,Delta}
     restart: unless-stopped
 
   ngrok:

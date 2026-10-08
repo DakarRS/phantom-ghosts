@@ -126,3 +126,27 @@ h1 span { color: #6ea3ff; margin-left: 14px; }
 .controls b { color: #9fc0ff; }
 #end .menu-inner h1 { font-size: 64px; }
 #end .stats { font-size: 22px; margin-top: 12px; opacity: .85; }
+
+/* Server browser */
+#browser { max-width: 640px; margin: 0 auto; }
+#callsign {
+  width: 100%; padding: 12px 14px; margin-bottom: 14px; font: inherit; font-size: 22px; font-weight: 700; letter-spacing: 3px;
+  background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.18); color: #fff; text-align: center; outline: none;
+}
+#callsign:focus { border-color: #6ea3ff; }
+#servers { display: flex; flex-direction: column; gap: 6px; }
+.srv {
+  display: grid; grid-template-columns: 1fr 90px 110px 110px; align-items: center; gap: 10px; padding: 10px 14px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); text-align: left; font-size: 18px;
+}
+.srv b { font-size: 20px; letter-spacing: 2px; }
+.srv span { opacity: .75; font-size: 16px; }
+.srv button { font: inherit; font-weight: 700; letter-spacing: 3px; padding: 6px 0; background: #6ea3ff; color: #0b0d10; border: none; cursor: pointer; }
+.srv button:hover { background: #8fb8ff; }
+.srv button:disabled { background: #555; color: #999; cursor: default; }
+.srv-empty { opacity: .6; padding: 14px; }
+#room-name { letter-spacing: 4px; margin-bottom: 16px; color: #9fc0ff; }
+#menu-error { margin-top: 14px; color: #ff7a7a; min-height: 1em; }
+button.link { display: block; margin: 12px auto 0; background: none; border: none; color: #fff; opacity: .6; font: inherit; letter-spacing: 3px; cursor: pointer; }
+button.link:hover { opacity: 1; }
+#scoreboard small { opacity: .5; font-size: 11px; }

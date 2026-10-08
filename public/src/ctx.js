@@ -1,7 +1,6 @@
 // Shared runtime state so systems can reach each other without threading every dependency through constructors.
 export const G = {
   time: 0,
-  entities: [],
   scene: null,
   camera: null,
   player: null,
@@ -9,7 +8,12 @@ export const G = {
   effects: null,
   audio: null,
   hud: null,
-  match: null,
-  grenades: null,
-  world: null,
+  net: null,
+  remotes: null,
+  myId: null,
+  team: null,
+  roster: new Map(),
+  score: [0, 0],
+  timeLeft: 600,
+  shake: 0,
 };
