@@ -3,15 +3,12 @@ services:
     build: .
     image: ghcr.io/dakarrs/phantom-ghosts:latest
     ports:
-      - "${PORT:-8765}:80"
-    # Overlays the baked-in files so local edits show up on refresh without rebuilding.
-    volumes:
-      - ./public:/usr/share/nginx/html:ro
+      - "${PORT:-8765}:8080"
     restart: unless-stopped
 
   ngrok:
     image: ngrok/ngrok:3
-    command: http web:80
+    command: http web:8080
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?set NGROK_AUTHTOKEN in .env}
     ports:
